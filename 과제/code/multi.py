@@ -8,7 +8,6 @@ from nltk.tokenize import TreebankWordTokenizer
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 import re
-import string
 
 # Crossref 객체 생성 (User-Agent 설정)
 cr = Crossref(
@@ -46,7 +45,7 @@ lemmatizer = WordNetLemmatizer()
 def prep_apply(abst):
     #소문자화, 문장부호 제거
     abst = abst.lower()
-    abst = re.sub(rf"[{re.escape(string.punctuation)}]", ' ', abst)
+    abst = re.sub(r'[^\w\s-]', ' ', abst)
     #nltk 토큰화 결과
     result = []
     for i in tokenizer.tokenize(abst):
@@ -55,8 +54,8 @@ def prep_apply(abst):
             continue
         #표제어(동사 가정)
         i = lemmatizer.lemmatize(i, pos='v')
-        #길이 1이하 제거
-        if len(i) <= 1:
+        #길이 2이하 제거
+        if len(i) <= 2:
             continue
         result.append(i)
     #tf-idf시 문장넣어야하므로 역토큰화
