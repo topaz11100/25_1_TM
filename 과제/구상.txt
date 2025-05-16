@@ -1,0 +1,6 @@
+wos 에서 연합학습 치고 pyautogui로 스크랩(상세정보로 모으기)
+https://api.crossref.org/works/{doi} 이용해서 출판년도-월 수집
+엑셀 가공해서 초록,날짜로 조정
+초록 텍스트 전처리
+LDA로 토픽모델링
+날짜이용 hot-cold 분석

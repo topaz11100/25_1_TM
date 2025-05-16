@@ -27,7 +27,6 @@ def fetch_date(doi):
             date = paper['issued']['date-parts'][0]
         else:
             return None
-        
         return pd.Timestamp(year=date[0], month=date[1], day=1) 
     except:
         return None
@@ -41,6 +40,8 @@ def add_date(chunk):
 tokenizer  = TreebankWordTokenizer()
 stop_words = stopwords.words('english')
 lemmatizer = WordNetLemmatizer()
+custom_stopwords = {'data', 'federate', 'model', 'learn'}
+stop_words = set(stop_words) | custom_stopwords
 
 def prep_apply(abst):
     #소문자화, 문장부호 제거
@@ -49,13 +50,13 @@ def prep_apply(abst):
     #nltk 토큰화 결과
     result = []
     for i in tokenizer.tokenize(abst):
-        #불용어 거름
-        if i in stop_words:
-            continue
         #표제어(동사 가정)
         i = lemmatizer.lemmatize(i, pos='v')
         #길이 2이하 제거
         if len(i) <= 2:
+            continue
+        #불용어 거름
+        if i in stop_words:
             continue
         result.append(i)
     #tf-idf시 문장넣어야하므로 역토큰화
@@ -66,7 +67,7 @@ def text_prep(chunk):
     return chunk
 
 # 병렬 처리 함수
-def df_multi_process(df, apply, proc_n = 4):
+def df_multi_process(df, apply, proc_n = 6):
     chunk_arr = np.array_split(df, proc_n)
     with mp.Pool(proc_n) as pool:
         result_arr = pool.map(apply, chunk_arr)
