@@ -17,17 +17,15 @@ cr = Crossref(
 # 날짜 요청 함수 (단락평가 포함, 실패 방지)
 def fetch_date(doi):
     try:
-        paper = cr.works(ids = doi)['message']
-
-        if 'published-online' in paper and len(paper['published-online']['date-parts'][0]) >= 2:
-            date = paper['published-online']['date-parts'][0]
-        elif 'published-print' in paper and len(paper['published-print']['date-parts'][0]) >= 2:
-            date = paper['published-print']['date-parts'][0]
-        elif 'issued' in paper and len(paper['issued']['date-parts'][0]) >= 2:
-            date = paper['issued']['date-parts'][0]
-        else:
-            return None
-        return pd.Timestamp(year=date[0], month=date[1], day=1) 
+        paper = cr.works(ids=doi)['message']
+        today = pd.Timestamp.today()
+        for key in ['published-online', 'published-print', 'issued']:
+            if key in paper and len(paper[key]['date-parts'][0]) >= 2:
+                date = paper[key]['date-parts'][0]
+                ts = pd.Timestamp(year=date[0], month=date[1], day=1)
+                if ts <= today:
+                    return ts
+        return None
     except:
         return None
 # 발행날짜 추가
@@ -40,13 +38,14 @@ def add_date(chunk):
 tokenizer  = TreebankWordTokenizer()
 stop_words = stopwords.words('english')
 lemmatizer = WordNetLemmatizer()
+#없이 하면 너무 많이 나옴
 custom_stopwords = {'data', 'federate', 'model', 'learn'}
 stop_words = set(stop_words) | custom_stopwords
 
 def prep_apply(abst):
     #소문자화, 문장부호 제거
     abst = abst.lower()
-    abst = re.sub(r'[^\w\s-]', ' ', abst)
+    abst = re.sub(r'[^\w\s]', ' ', abst)
     #nltk 토큰화 결과
     result = []
     for i in tokenizer.tokenize(abst):
