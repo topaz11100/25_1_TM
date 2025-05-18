@@ -36,11 +36,15 @@ def add_date(chunk):
     return chunk
 
 tokenizer  = TreebankWordTokenizer()
-stop_words = stopwords.words('english')
+stop_words = set(stopwords.words('english'))
 lemmatizer = WordNetLemmatizer()
-#없이 하면 너무 많이 나옴
-custom_stopwords = {'data', 'federate', 'model', 'learn'}
-stop_words = set(stop_words) | custom_stopwords
+#도메인 특화 불용어
+custom_stopwords = {'data', 'model', 'federate', 'federated', 'framework',
+                    'learn', 'train', 'propose',
+                    'problem', 'challenge', 'methods',
+                    'server', 'clients', 'client',
+                    'privacy', 'local', 'global', 'however'}
+stop_words = stop_words | custom_stopwords
 
 def prep_apply(abst):
     #소문자화, 문장부호 제거
