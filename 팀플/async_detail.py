@@ -2,8 +2,8 @@ import aiohttp
 import asyncio
 
 # 세마포어와 지연 시간 설정
-semaphore = asyncio.Semaphore(10)  # 동시에 최대 10개까지
-REQUEST_DELAY = 0.2  # 각 요청 사이 0.2초 → 초당 약 5건으로 제한
+semaphore = asyncio.Semaphore(1)  
+REQUEST_DELAY = 0.2  
 
 async def fetch_course_detail(session, cid, url, user_key):
     params = {'ServiceKey': user_key, 'CourseId': cid}
@@ -11,9 +11,9 @@ async def fetch_course_detail(session, cid, url, user_key):
         await asyncio.sleep(REQUEST_DELAY)
         async with session.get(url, params=params) as response:
             if 'application/json' in response.headers.get('Content-Type', ''):
-                    json_result = await response.json()
-                    result = json_result['results']
-                    return result['name'], result['summary']
+                json_result = await response.json()
+                result = json_result['results']
+                return result['name'], result['summary']
             else:
                 text = await response.text()
                 print(f"[{cid}] XML 응답 (에러): {text[:150]}")
